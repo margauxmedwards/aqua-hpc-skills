@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="How the QCR community aqua-hpc skill lets Codex, Claude Code and Copilot prepare, submit, monitor and validate QUT Aqua PBS jobs."
+    />
+    <title>AI agent guide · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html" aria-current="page">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · AI agent guide</div>
+      <h1>Your coding agent,<br />taught the Aqua workflow.</h1>
+      <p>
+        One shared skill that lets Codex, Claude Code or Copilot prepare,
+        submit, monitor and check your Aqua PBS jobs—following the same rules
+        every time, within the scope and budget you set.
+      </p>
+      <div class="badges">
+        <span class="badge">Codex + Claude Code + Copilot</span
+        ><span class="badge">PBS · Pixi · ROS · Python</span
+        ><span class="badge">Reviewed 28 September 2026</span>
+      </div>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Guide sections">
+          <a href="#how">How it works</a
+          ><a href="#workflow">What the agent does</a
+          ><a href="#guardrails">Scope &amp; guardrails</a
+          ><a href="#agents">Set up your agent</a
+          ><a href="#requests">Ask your agent</a
+          ><a href="#maintain">Keep things current</a
+          ><a href="#sources">Sources &amp; verification</a>
+        </nav>
+        <p>
+          New to Aqua? Read
+          <a href="https://docs.eres.qut.edu.au/about-aqua">QUT’s Aqua documentation</a> or work through
+          <a href="first-job.html">Aqua basics</a> by hand first.
+        </p>
+      </aside>
+      <main id="main">
+        <section id="how">
+          <span class="section-kicker">Start here / How the agent support works</span>
+          <h2>What the skill adds to your agent.</h2>
+          <p class="lede">
+            A coding agent can already read your code, edit files and run
+            commands such as <code>ssh</code>. The <b>aqua-hpc skill</b> is a
+            folder of instructions it loads when you ask for Aqua work. It tells
+            the agent how Aqua differs from your laptop: where work may run,
+            what every submission must include, and what counts as a finished
+            experiment.
+          </p>
+          <div class="grid" aria-label="Where the agent and your work run">
+            <article class="card">
+              <span class="number">01 / YOUR COMPUTER</span>
+              <h3>The agent runs here</h3>
+              <p>
+                It reads your project, writes job scripts and a run manifest,
+                and reaches Aqua through the SSH access you already have.
+                Nothing is installed on Aqua.
+              </p>
+            </article>
+            <article class="card">
+              <span class="number">02 / AQUA LOGIN NODE</span>
+              <h3>The agent administers here</h3>
+              <p>
+                Staging files, submitting with <code>qsub</code> and reading
+                <code>qstat</code>. Short, lightweight commands only—never the
+                workload itself.
+              </p>
+            </article>
+            <article class="card">
+              <span class="number">03 / COMPUTE NODES</span>
+              <h3>PBS runs your work here</h3>
+              <p>
+                The scheduler starts each job when resources are free. The agent
+                checks logs and outputs afterwards and reports what it found.
+              </p>
+            </article>
+          </div>
+          <div class="callout warning">
+            <strong>The skill does not give you access.</strong>
+            <p>
+              It does not create an HPC account, choose or authorise an RPID,
+              configure SSH, or override your agent’s permission settings. You
+              need working Aqua access first. QUT’s
+              <a href="https://docs.eres.qut.edu.au/about-aqua">Aqua documentation</a> and
+              <a href="https://docs.eres.qut.edu.au/hpc-submitting-jobs-on-aqua">job submission guide</a> are authoritative;
+              <a href="first-job.html">Aqua basics</a> walks through a first job
+              by hand.
+            </p>
+          </div>
+          <details>
+            <summary>What is in the toolkit?</summary>
+            <div class="detail">
+              <dl>
+                <dt><b><a href="../skills/aqua-hpc/SKILL.md">SKILL.md</a></b></dt>
+                <dd>
+                  The short workflow the agent follows. It is loaded whenever
+                  the skill is invoked.
+                </dd>
+                <dt><b>References</b></dt>
+                <dd>
+                  Detail the agent reads only when relevant:
+                  <a href="../skills/aqua-hpc/references/pbs.md">RPID &amp; PBS</a>,
+                  <a href="../skills/aqua-hpc/references/environments.md">environments</a>,
+                  <a href="../skills/aqua-hpc/references/experiments.md">experiments</a>,
+                  <a href="../skills/aqua-hpc/references/ros.md">ROS</a>,
+                  <a href="../skills/aqua-hpc/references/queue-and-time.md">queues &amp; walltime</a>,
+                  <a href="../skills/aqua-hpc/references/operations.md">operations</a>,
+                  <a href="../skills/aqua-hpc/references/recovery.md">recovery</a>
+                  and
+                  <a href="../skills/aqua-hpc/references/common-requests.md">common requests</a>.
+                </dd>
+                <dt><b>Installer</b></dt>
+                <dd>
+                  <code>scripts/install_skills.py</code> copies the skill into a
+                  project for your chosen agent.
+                  <a href="#agents">Set it up</a>.
+                </dd>
+                <dt><b>Example</b></dt>
+                <dd>
+                  <a href="../examples/matrix/README.md">A tiny eight-cell CPU
+                  matrix</a> for trying a bounded campaign end to end.
+                </dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+        <section id="workflow">
+          <span class="section-kicker">How it works / What the agent does</span>
+          <h2>The same seven steps, every time.</h2>
+          <p class="lede">
+            When you ask for Aqua work, the skill has the agent follow this
+            sequence. Each step leaves evidence you can check. You decide how
+            far it goes: preparation only, one smoke test, or a full campaign.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Establish the run</h3>
+              <p>
+                SSH alias, remote workspace, authorised RPID, input locations,
+                resource budget and which actions you allowed. It reuses answers
+                you already gave instead of asking again.
+              </p>
+            </li>
+            <li>
+              <h3>Know where each command runs</h3>
+              <p>
+                It separates local preparation, lightweight login-node
+                administration and scheduled compute, and discovers
+                <code>qsub</code>, queues and storage rather than assuming them.
+              </p>
+            </li>
+            <li>
+              <h3>Account for the project</h3>
+              <p>
+                Every submission carries a real RPID—never a placeholder, and
+                never the old no-RPID grace period.
+                <a href="../skills/aqua-hpc/references/pbs.md">RPID and PBS rules</a>.
+              </p>
+            </li>
+            <li>
+              <h3>Stage a fixed snapshot</h3>
+              <p>
+                It copies one version of your code into a new run directory and
+                records the revision, lockfile hash, flags and data identity, so
+                queued jobs never read a checkout you are still editing. It
+                checks for fixes made on Aqua before syncing over them.
+              </p>
+            </li>
+            <li>
+              <h3>Prove one case first</h3>
+              <p>
+                It preflights the real environment on a compute node, then runs
+                one representative case before scaling. See
+                <a href="../skills/aqua-hpc/references/environments.md">environments</a>,
+                <a href="../skills/aqua-hpc/references/experiments.md">experiments</a>
+                and
+                <a href="../skills/aqua-hpc/references/ros.md">ROS</a>.
+              </p>
+            </li>
+            <li>
+              <h3>Submit and record</h3>
+              <p>
+                It saves each PBS job ID immediately, and keeps
+                <i>accepted</i>, <i>queued</i>, <i>running</i>,
+                <i>exited 0</i> and <i>scientifically complete</i> apart.
+                Success means the expected outputs exist and check out.
+              </p>
+            </li>
+            <li>
+              <h3>Monitor and recover within limits</h3>
+              <p>
+                It batches SSH queries, reuses one watcher, and retries only
+                within the caps you set. When the evidence needs you or an
+                operator, it stops and says so.
+                <a href="../skills/aqua-hpc/references/operations.md">Operations</a>
+                ·
+                <a href="../skills/aqua-hpc/references/recovery.md">recovery</a>.
+              </p>
+            </li>
+          </ol>
+          <div class="callout">
+            <strong>Every report says what actually happened.</strong>
+            <p>
+              What was changed or submitted, job IDs, observed state, output
+              locations, validation evidence and open issues. The agent never
+              infers success from empty output, a missing queue entry or a
+              successful SSH login.
+            </p>
+          </div>
+        </section>
+        <section id="guardrails">
+          <span class="section-kicker">How it works / Scope and guardrails</span>
+          <h2>You set the scope. The agent stays inside it.</h2>
+          <p class="lede">
+            Your wording is the authorisation. Preparing work does not permit
+            submitting it, and a status question does not permit retries or
+            cancellation.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>You ask</th>
+                  <th>The agent may</th>
+                  <th>It will not</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>“Prepare it; do not submit yet.”</td>
+                  <td>Inspect the project, write scripts, stage a preview.</td>
+                  <td>Submit anything.</td>
+                </tr>
+                <tr>
+                  <td>“Run a smoke test under my RPID.”</td>
+                  <td>Submit one small job and check its output.</td>
+                  <td>Launch the full matrix.</td>
+                </tr>
+                <tr>
+                  <td>“Submit these 12 cells, max two at once.”</td>
+                  <td>Submit, record every ID, validate each output.</td>
+                  <td>Exceed the concurrency or tested resources.</td>
+                </tr>
+                <tr>
+                  <td>“Update?”</td>
+                  <td>Take one fresh, read-only status snapshot.</td>
+                  <td>Start another watcher, retry or cancel.</td>
+                </tr>
+                <tr>
+                  <td>“Fix errors; one retry, up to 32 GB and 4 h.”</td>
+                  <td>
+                    Diagnose, fix in a new snapshot, retry each failed cell once.
+                  </td>
+                  <td>
+                    Change scientific settings or go past the cap.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Once you have authorised an action and its budget, the agent
+            won’t ask for the same permission again. Your agent’s own tool
+            prompts still apply.
+          </p>
+          <p>
+            Let one agent own submissions for each campaign. If you switch
+            agents, hand over the run record—run path, code/lock/data hashes,
+            config, manifest, PBS IDs, last known state and remaining work—but
+            never secrets.
+          </p>
+        </section>
+        <section id="agents">
+          <span class="section-kicker">Set up / Install the skill</span>
+          <h2>Install once per project.</h2>
+          <p class="lede">
+            You need Python 3, Git, a coding agent and SSH access to Aqua that
+            already works. The agent runs on your own computer.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Get the toolkit</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  On your own machine · get the toolkit<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="clone-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="clone-command">git clone https://github.com/margauxmedwards/aqua-hpc-skills.git
+cd aqua-hpc-skills</code></pre>
+              </div>
+              <p class="small" id="checkout-note">
+                Use the default branch.
+              </p>
+            </li>
+            <li>
+              <h3>Install the skill into your project</h3>
+              <p>
+                Pick your agent and run this from the toolkit folder. Replace
+                <code>/path/to/your/project</code> with your experiment’s folder
+                <b>on your computer</b>, not on Aqua.
+              </p>
+              <div
+                class="chooser js-only"
+                role="group"
+                aria-label="Choose your coding agent"
+              >
+                <button type="button" data-agent="codex" aria-pressed="true">
+                  Codex</button
+                ><button type="button" data-agent="claude" aria-pressed="false">
+                  Claude Code</button
+                ><button type="button" data-agent="copilot" aria-pressed="false">
+                  Copilot
+                </button>
+              </div>
+              <div class="codebox">
+                <div class="codehead">
+                  <span id="agent-label"
+                    >Install for Codex · from the toolkit directory</span
+                  ><button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="install-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="install-command">python3 scripts/install_skills.py --agent codex --project /path/to/your/project</code></pre>
+              </div>
+              <p id="agent-location">
+                Installed into <code>.agents/skills/aqua-hpc</code> in your project.
+                Start or reload Codex there, then mention <code>$aqua-hpc</code>.
+              </p>
+              <noscript
+                ><p>
+                  For Claude Code use <code>--agent claude</code>, which installs to
+                  <code>.claude/skills/aqua-hpc</code>; invoke with
+                  <code>/aqua-hpc</code>. For Copilot use
+                  <code>--agent copilot</code>, which installs to
+                  <code>.github/skills/aqua-hpc</code>; ask it to use the aqua-hpc
+                  skill.
+                </p></noscript
+              >
+              <p class="small">
+                The installer never overwrites an existing copy and does not set up
+                SSH or cluster permissions. Updating? See
+                <a href="#maintain">keep things current</a>.
+              </p>
+            </li>
+            <li>
+              <h3>Start with a plan, not a submission</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  First prompt · fill in your own paths and budget<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-prompt"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-prompt">$aqua-hpc Inspect this project's runner, flags and environment.
+Use my SSH alias [alias], remote workspace [path], and authorized RPID [ID].
+Prepare a representative smoke test before the full experiment.
+Budget: [CPUs / RAM / GPUs / walltime], [N] concurrent jobs.
+Show me the concrete run configuration; do not submit yet.</code></pre>
+              </div>
+              <p class="small">
+                When the plan looks right, change the last line to authorise
+                submission. The agent won’t ask again for permission you have
+                already given.
+              </p>
+            </li>
+          </ol>
+          <p class="small">
+            New to coding agents?
+            <a href="https://margauxmedwards.github.io/ai4coding/"
+              >AI4Coding: getting-started tips</a
+            >
+            covers context, prompts and defining success
+            (<a href="https://github.com/margauxmedwards/ai4coding">repository</a>).
+          </p>
+        </section>
+        <section id="requests">
+          <span class="section-kicker">Reference / Common requests</span>
+          <h2>A practical prompt cookbook.</h2>
+          <p class="lede">
+            Use these in Codex, Claude Code or Copilot with the Aqua skill loaded. Each
+            response should distinguish observations, proposed actions and work
+            actually completed.
+          </p>
+          <details>
+            <summary>“Is the HPC working?”</summary>
+            <div class="detail">
+              <span class="tag">Read-only health check</span>
+              <p>
+                Ask for separate checks of login, scheduler and queue health,
+                plus the observation time. A login success alone does not
+                establish compute health.
+              </p>
+              <blockquote>
+                Checked at [time]: login reachable; PBS responsive; [queue]
+                enabled and started. Compute execution not tested.
+              </blockquote>
+              <p>
+                A failed scheduler query means unknown or unresponsive, not
+                necessarily a cluster-wide outage. “Schedule a small test under
+                my RPID” separately authorizes a compute smoke job.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>“Run this experiment for me on the HPC.”</summary>
+            <div class="detail">
+              <p>
+                Provide the entrypoint/config, inputs, RPID, remote path and
+                resource budget. Ask for one representative smoke case before
+                the approved matrix.
+              </p>
+              <blockquote>
+                Run this manifest on Aqua under my recorded RPID. Maximum two
+                concurrent jobs; use the measured resource request. Validate a
+                smoke case first, then submit the eight cells and save their
+                IDs.
+              </blockquote>
+              <p>
+                Expect the submitted IDs, selected route/placement, per-job
+                resources, output path, smoke evidence and observed state. No
+                job ID should be invented when a submission is unresolved.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>“Which queue and walltime should I use?”</summary>
+            <div class="detail">
+              <blockquote>
+                Compare QCR and general placement for this experiment. Check my
+                eligibility, tested GPU requirements and current limits.
+                Estimate walltime from representative runs and state queue-wait
+                uncertainty.
+              </blockquote>
+              <p>
+                Expect a recommendation with evidence. QCR membership, project
+                accounting and hardware compatibility are separate. A job that
+                needs 60 hours without checkpoints will not fit a 48-hour queue.
+                Background:
+                <a href="first-job.html#queues">queues and walltime</a>.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>“Update?” / “How are my experiments going?”</summary>
+            <div class="detail">
+              <span class="tag">One fresh snapshot</span>
+              <blockquote>
+                As of [time], 3/8 cells are validated: 1 running, 1 queued, 2
+                failed, 1 not submitted. The running cell is at 50/100 records.
+                One failed cell exited zero but produced 0/100 outputs. ETA
+                unknown.
+              </blockquote>
+              <p>
+                This is an illustrative response, not current job status. Counts
+                should reconcile with the original manifest; attempts should not
+                inflate cell counts. Stale data and unverified outputs must be
+                labeled.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>“Can you poll my HPC experiments?”</summary>
+            <div class="detail">
+              <blockquote>
+                Monitor these recorded jobs every 10 minutes for up to an hour,
+                or until all are terminal. Reuse any existing monitor. Report
+                failures and incomplete outputs; do not retry jobs
+                automatically.
+              </blockquote>
+              <p>
+                Expect the actual monitor/session identity, interval, deadline,
+                last observation and available delivery channel. A tool must not
+                promise chat notifications unless that capability is configured.
+                “Update?” should not create a second watcher.
+              </p>
+              <p>
+                “Stop polling, leave the experiments running” stops only that
+                monitor, not PBS jobs or shared SSH connections.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>“Have there been errors? Check and fix them.”</summary>
+            <div class="detail">
+              <blockquote>
+                Inspect the recorded jobs, logs and expected outputs. Fix
+                diagnosed causes in a new snapshot, validate a representative
+                case, and retry terminal failed cells within our existing
+                budget. Preserve successful cells and live jobs.
+              </blockquote>
+              <p>
+                Expect the evidence, actual fix, validation result, old→new job
+                mapping and remaining issues. An environment repair should not
+                silently change model, sensor, precision or sampling choices.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>
+              “If it hits memory or walltime, requeue with more.”
+            </summary>
+            <div class="detail">
+              <blockquote>
+                Allow at most one resource-recovery retry per failed cell, up to
+                32 GB host RAM and four hours, maximum two concurrent. Preserve
+                the scientific configuration. Confirm the original job is
+                terminal and no replacement is running before submitting.
+              </blockquote>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Failure</th>
+                      <th>What helps</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Confirmed host RAM limit</td>
+                      <td>
+                        Measured RAM increase within the cap. A cap is not the
+                        original request.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>CUDA / GPU out of memory</td>
+                      <td>
+                        Investigate VRAM; more host RAM does not add device
+                        memory.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Walltime limit with progress</td>
+                      <td>
+                        Enough time for a full restart, or a verified compatible
+                        checkpoint.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Disk, inode or quota exhaustion</td>
+                      <td>
+                        Storage diagnosis and scoped recovery, not extra RAM.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Unknown state or submission timeout</td>
+                      <td>
+                        Reconcile the original job; do not create a possible
+                        duplicate.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                Stop at the agreed retry/resource limits. A replacement usually
+                gets a new PBS ID; more walltime does not automatically resume
+                prior work.
+                <a href="../skills/aqua-hpc/references/recovery.md"
+                  >Recovery rules and evidence</a
+                >.
+              </p>
+            </div>
+          </details>
+          <p class="small">
+            These formats were exercised in 14 synthetic scenarios with both
+            Codex and Claude, with targeted recovery retests.
+            <a href="../tests/behavior/results-2026-09-28/README.md"
+              >Read the responses and evaluation notes</a
+            >.
+          </p>
+        </section>
+        <section id="maintain">
+          <span class="section-kicker"
+            >Reference / Updates and maintenance</span
+          >
+          <h2>Make updates deliberate.</h2>
+          <div class="split">
+            <article class="card">
+              <h3>When QUT changes a requirement</h3>
+              <ol>
+                <li>
+                  Check the official notice, effective date and affected jobs.
+                </li>
+                <li>
+                  Update the shared submission wrapper and all exceptional
+                  paths, including retries and interactive sessions.
+                </li>
+                <li>
+                  Validate a small job and inspect its recorded
+                  accounting/resources and outputs.
+                </li>
+                <li>
+                  Record the date and evidence in the shared references.
+                  Distinguish policy from a cluster snapshot.
+                </li>
+                <li>
+                  Update the hand-run examples in
+                  <a href="rpid.html">RPID page</a> too.
+                </li>
+              </ol>
+            </article>
+            <article class="card">
+              <h3>When this toolkit changes</h3>
+              <ol>
+                <li>
+                  Check local changes with <code>git status</code>, then fetch
+                  and inspect the update.
+                </li>
+                <li>
+                  On the intended branch, use
+                  <code>git pull --ff-only</code> when your working tree is
+                  ready.
+                </li>
+                <li>
+                  Compare <code>skills/aqua-hpc</code> against your project’s
+                  installed copy. Preserve local customizations.
+                </li>
+                <li>
+                  Move the old installed folder to a backup outside the agent’s
+                  skill-discovery folder, then rerun the installer.
+                </li>
+                <li>
+                  Restart/reload the agent and try a read-only health or
+                  planning prompt.
+                </li>
+              </ol>
+            </article>
+          </div>
+          <p class="small">
+            Move the old installed copy aside before reinstalling, retire any
+            old copied Copilot instructions, and never change files that queued
+            or running jobs are using.
+          </p>
+          <p>
+            For the RPID requirement, the <a href="rpid.html#agent">RPID page</a> has a
+            ready-made prompt that asks your agent to update every submission path.
+          </p>
+        </section>
+        <section id="sources">
+          <span class="section-kicker">Reference / Sources and limits</span>
+          <h2>Sources and limits.</h2>
+          <p>Official QUT guidance takes precedence over this community guide:</p>
+          <ul>
+            <li><a href="https://docs.eres.qut.edu.au/about-aqua">About Aqua</a></li>
+            <li><a href="https://docs.eres.qut.edu.au/hpc-submitting-jobs-on-aqua">Submitting jobs on Aqua</a></li>
+            <li>
+              <a href="https://docs.eres.qut.edu.au/about-rdss">About RDSS</a>
+              and <a href="https://docs.eres.qut.edu.au/rdss-faqs">RDSS FAQs</a>
+            </li>
+            <li>
+              <a href="https://data-mgmt-plan.qut.edu.au/"
+                >QUT Data Management Plan system</a
+              >
+            </li>
+          </ul>
+          <p>
+            The RPID deadline comes from QUT’s notice, and the RPID format from
+            Aqua’s scheduler. Queue details come from read-only scheduler queries on
+            28 September 2026. The example matrix was tested against simulated PBS;
+            a live array with a valid RPID and automatic recovery are not yet
+            verified.
+          </p>
+          <p class="small">
+            <a href="../skills/aqua-hpc/references/sources.md"
+              >Full source and maintenance notes</a
+            >
+            ·
+            <a href="https://developers.openai.com/codex/skills">Codex skills</a>
+            ·
+            <a href="https://code.claude.com/docs/en/skills">Claude Code skills</a>
+            ·
+            <a href="https://pixi.prefix.dev/latest/reference/cli/pixi/run/"
+              >Pixi run</a
+            >
+          </p>
+        </section>
+        <footer class="footer">
+          AI agent guide · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

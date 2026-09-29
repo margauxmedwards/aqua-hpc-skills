@@ -1,0 +1,4 @@
+#!/bin/bash
+# Legacy placeholder; deliberately not a runnable submission template.
+echo 'Use examples/matrix/job.pbs via scripts/submit_demo.py with a real RPID.' >&2
+exit 2

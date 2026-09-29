@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="A plain-language community guide to QUT Aqua HPC: your first job, the RPID requirement, walltime, ROS and using AI coding agents."
+    />
+    <title>Aqua field guide · QCR community toolkit</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">QCR community toolkit · QUT Aqua</div>
+      <h1>Run your research<br />on Aqua.</h1>
+      <p>
+        Plain-language guides and helpers for QUT’s Aqua HPC—whether you are submitting your first job or handing routine work to an AI coding agent.
+      </p>
+      <div class="badges"><span class="badge">For new and experienced users</span><span class="badge">Reviewed 28 September 2026</span></div>
+    </div>
+    <div class="layout single">
+      <main id="main">
+        <section id="start">
+          <h2>Where would you like to start?</h2>
+          <p class="lede">
+            Pick the guide that matches what you need. Each one stands on its own.
+          </p>
+          <div class="grid cards">
+          <a class="card link-card" href="first-job.html">
+            <span class="number">New to Aqua?</span>
+            <h3>Your first job</h3>
+            <p>Connect, submit a tiny test job and check the result, one step at a time. About 30 minutes once you have access.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="agents.html">
+            <span class="number">Using an AI coding agent?</span>
+            <h3>AI agent guide</h3>
+            <p>Teach Codex, Claude Code or Copilot the Aqua workflow so it can prepare, submit and check jobs within limits you set.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="rpid.html">
+            <span class="number">Required from 2 November 2026</span>
+            <h3>Project ID (RPID)</h3>
+            <p>Find your research project ID, add it to your job scripts, and build the commands with a local helper.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="walltime.html">
+            <span class="number">Not sure how long to ask for?</span>
+            <h3>Walltime calculator</h3>
+            <p>Turn a quick timing measurement into a walltime request with headroom, and check it fits the queue.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="mount.html">
+            <span class="number">Checking on jobs a lot?</span>
+            <h3>Mount Aqua</h3>
+            <p>Open Aqua’s files on your computer through one connection, and poll jobs without logging in over and over.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="notify.html">
+            <span class="number">Tired of checking the queue?</span>
+            <h3>Notifications</h3>
+            <p>Get a phone notification when a job starts, finishes, fails or is held.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="ros.html">
+            <span class="number">Running ROS or robotics?</span>
+            <h3>ROS on Aqua</h3>
+            <p>Four checks for headless ROS jobs: the code that runs, job isolation, reliable startup and complete output.</p>
+            <span class="go" aria-hidden="true">Open →</span>
+          </a>
+          <a class="card link-card" href="https://docs.eres.qut.edu.au/about-aqua">
+            <span class="number">The rules live here</span>
+            <h3>Official QUT docs</h3>
+            <p>Accounts, access, storage and current requirements. They take precedence over this guide.</p>
+            <span class="go" aria-hidden="true">Open ↗</span>
+          </a>
+          </div>
+        </section>
+        <section id="aqua">
+          <h2>Aqua in one minute.</h2>
+          <p>
+            <b>Aqua</b> is QUT’s high-performance computing (HPC) system: a shared
+            group of powerful computers. You don’t run experiments on it directly.
+            Instead you:
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Connect to a login node</h3>
+              <p>Using SSH from your own computer’s terminal.</p>
+            </li>
+            <li>
+              <h3>Submit a job</h3>
+              <p>
+                A script plus a request for CPUs, memory, GPUs and time, charged to
+                your project’s RPID.
+              </p>
+            </li>
+            <li>
+              <h3>Let the scheduler run it</h3>
+              <p>
+                PBS starts the job on a compute node when resources are free, then
+                you check the output.
+              </p>
+            </li>
+          </ol>
+          <p><a class="action" href="first-job.html">Try it with your first job →</a></p>
+        </section>
+        <section id="before">
+          <h2>What you need before you begin.</h2>
+          <ul>
+            <li>
+              A QUT account with HPC access. If you don’t have one, ask your
+              supervisor or see <a href="https://docs.eres.qut.edu.au/about-aqua">QUT’s Aqua documentation</a>.
+            </li>
+            <li>
+              Your research project’s <a href="rpid.html">RPID</a>.
+            </li>
+            <li>A terminal on your computer. No AI tool is needed to start.</li>
+          </ul>
+          <p class="small">
+            This is a community guide from QCR researchers, not official QUT policy.
+            Where they differ, follow QUT.
+          </p>
+        </section>
+        <footer class="footer">
+          Aqua field guide · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="How to find your QUT research project ID (RPID) and add it to every Aqua PBS submission, with a local command builder."
+    />
+    <title>RPID requirement · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html" aria-current="page">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · RPID</div>
+      <h1>Add your project ID<br />to every job.</h1>
+      <p>
+        From 2 November 2026 every Aqua submission must include an RPID. Find yours, update your scripts, and let a local helper build the commands.
+      </p>
+      <div class="badges"><span class="badge">Required from 2 November 2026</span></div>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Page sections">
+          <a href="#what">What changed</a>
+          <a href="#find">1. Find your RPID</a>
+          <a href="#scripts">2. Update job scripts</a>
+          <a href="#helper">Command helper</a>
+          <a href="#agent">Using an AI agent</a>
+          <a href="#official">Official sources</a>
+        </nav>
+      </aside>
+      <main id="main">
+        <section id="what">
+          <span class="section-kicker">What changed</span>
+          <h2>Every Aqua job needs a project ID.</h2>
+          <p class="lede">
+            An RPID (research project ID) tells QUT which research project a job
+            belongs to. Aqua checks it when you submit.
+          </p>
+          <div class="callout warning">
+            <strong>Required in every submission from 2 November 2026.</strong>
+            <p>
+              That includes job arrays, interactive jobs and retries. Start using it
+              now rather than relying on the grace period.
+            </p>
+          </div>
+        </section>
+        <section id="find">
+          <span class="section-kicker">Step 1</span>
+          <h2>Find your RPID.</h2>
+          <ol class="steps">
+            <li>
+              <h3>Look it up</h3>
+              <p>
+                Sign in to the <a href="https://data-mgmt-plan.qut.edu.au/">QUT Data Management Plan system</a>
+                and open your research project. An RPID is six uppercase letters
+                followed by four digits. Menu labels may differ slightly from this
+                description.
+              </p>
+            </li>
+            <li>
+              <h3>Can’t find it? Ask</h3>
+              <p>
+                Your project lead or QUT eResearch can confirm the right ID and that
+                you may use it. Never borrow another project’s ID or use an example
+                ID such as <code>ABCDEF1234</code>.
+              </p>
+            </li>
+          </ol>
+          <p class="small">
+            A correctly formatted ID is not proof that you are authorised; the
+            scheduler checks that.
+          </p>
+        </section>
+        <section id="scripts">
+          <span class="section-kicker">Step 2</span>
+          <h2>Add it to your job scripts.</h2>
+          <p class="lede">Choose one of these two ways.</p>
+          <ol class="steps">
+            <li>
+              <h3>Write it into the script</h3>
+              <p>
+                Put a literal ID in the <code>#PBS</code> lines at the top, before any
+                commands:
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Inside job.pbs · replace the example ID<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="rpid-directive"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="rpid-directive">#PBS -P ABCDEF1234</code></pre>
+              </div>
+            </li>
+            <li>
+              <h3>Or pass it when you submit</h3>
+              <p>Useful when one script is shared across projects:</p>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · replace YOUR_REAL_RPID<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="rpid-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="rpid-command">export AQUA_RPID=YOUR_REAL_RPID
+qsub -P &quot;$AQUA_RPID&quot; job.pbs</code></pre>
+              </div>
+            </li>
+          </ol>
+          <div class="callout warning">
+            <strong>Don’t write <code>#PBS -P $AQUA_RPID</code>.</strong>
+            <p>
+              PBS reads <code>#PBS</code> lines before the shell runs, so shell
+              variables are not expanded there.
+            </p>
+          </div>
+          <p>
+            Add <code>-P "$AQUA_RPID"</code> to array, interactive and retry wrappers
+            too. Keep your real ID out of files you share publicly.
+          </p>
+        </section>
+        <section id="helper">
+          <span class="section-kicker">Helper</span>
+          <h2>Build the commands for your ID.</h2>
+          <div class="tool js-only">
+            <span class="tag">Local helper</span>
+            <h3>Build the accounting commands</h3>
+            <p class="small">
+              Only checks the format. Nothing is sent, saved or submitted. Use
+              your own authorized ID.
+            </p>
+            <form id="rpid-form">
+              <div class="fields">
+                <label for="rpid-value"
+                  >Project RPID<input
+                    id="rpid-value"
+                    name="rpid"
+                    maxlength="10"
+                    placeholder="Six letters + four digits"
+                    autocomplete="off"
+                    spellcheck="false"
+                    required
+                    pattern="[A-Z]{6}[0-9]{4}"
+                    aria-describedby="rpid-help"
+                /></label>
+                <div>
+                  <p id="rpid-help" class="small">
+                    Uppercase, for example ABCDEF1234. That documentation
+                    placeholder is deliberately rejected by this helper.
+                  </p>
+                </div>
+              </div>
+              <button class="action" type="submit">Build commands</button>
+            </form>
+            <p id="rpid-status" class="status" role="status"></p>
+            <div class="codebox" id="rpid-generated-box" hidden>
+              <div class="codehead">
+                Choose a literal directive OR command-line submission<button
+                  class="copy js-only"
+                  type="button"
+                  data-copy="rpid-generated"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre><code id="rpid-generated"></code></pre>
+            </div>
+          </div>
+          <noscript
+            ><p>
+              The helper needs JavaScript. Use the two examples above, replacing the
+              example ID with your own.
+            </p></noscript
+          >
+        </section>
+        <section id="agent">
+          <span class="section-kicker">Using an AI agent?</span>
+          <h2>Let your agent update every submission path.</h2>
+          <p>
+            With the <a href="agents.html">aqua-hpc skill</a> installed, paste this
+            request. It asks the agent to cover the easy-to-miss paths and to test
+            with one tiny job.
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Copyable update request<button
+                class="copy js-only"
+                type="button"
+                data-copy="update-prompt"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="update-prompt">Update this project's Aqua submission paths for the current QUT RPID requirement.
+Inspect ordinary jobs, arrays, interactive helpers and recovery scripts.
+Use my authorized RPID from local configuration; keep it out of committed examples.
+Use a literal #PBS -P value or qsub -P "$AQUA_RPID", not a variable in a directive.
+Preserve scientific settings and active run snapshots.
+Show the changes and validation, then prepare one tiny test job.</code></pre>
+          </div>
+        </section>
+        <section id="official">
+          <span class="section-kicker">Official sources</span>
+          <h2>Check QUT’s guidance.</h2>
+          <ul>
+            <li><a href="https://docs.eres.qut.edu.au/hpc-submitting-jobs-on-aqua">Submitting jobs on Aqua</a></li>
+            <li><a href="https://data-mgmt-plan.qut.edu.au/">QUT Data Management Plan system</a></li>
+          </ul>
+          <p class="small">
+            The deadline comes from QUT’s notice and the format from Aqua’s scheduler
+            notice (28 September 2026). See
+            <a href="agents.html#sources">sources and limits</a>.
+          </p>
+        </section>
+        <footer class="footer">
+          RPID · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N aqua_demo
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=1:mem=1gb
+#PBS -l walltime=00:02:00
+#PBS -j oe
+# RPID, array indices and absolute logs supplied by submit_demo.py.
+set -euo pipefail
+cd "${RUN_DIR:?Submit through scripts/submit_demo.py}"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export PYTHONUNBUFFERED=1
+python3 run_cell.py --manifest matrix.json --index "${PBS_ARRAY_INDEX:-0}" --output results

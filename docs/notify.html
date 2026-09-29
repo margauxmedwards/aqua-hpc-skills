@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Get phone notifications when your QUT Aqua PBS jobs start, finish, fail or are held, using the hpc-watch tool and the free ntfy app."
+    />
+    <title>Notifications · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html" aria-current="page">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · Notifications</div>
+      <h1>Get a ping when<br />your job is done.</h1>
+      <p>
+        Phone notifications when your Aqua jobs start, finish, fail or get held, so you stop checking the queue by hand.
+      </p>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Page sections">
+          <a href="#why">How it works</a>
+          <a href="#setup">Set up once</a>
+          <a href="#what">What you’ll hear about</a>
+          <a href="#logs">Progress from logs</a>
+          <a href="#good">Good habits</a>
+        </nav>
+      </aside>
+      <main id="main">
+        <section id="why">
+          <span class="section-kicker">Why notifications?</span>
+          <h2>Let the jobs tell you.</h2>
+          <p class="lede">
+            Instead of checking the queue yourself, get a push notification on your
+            phone when a job starts, finishes, fails or gets held.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>A small program runs on your computer</h3>
+              <p>
+                Every 3 minutes it asks Aqua for your jobs’ state with
+                <code>qstat</code>, over one shared SSH connection.
+              </p>
+            </li>
+            <li>
+              <h3>It notices what changed</h3>
+              <p>
+                It keeps a local history and compares each check with the last one,
+                so you hear about each change once. A 30-task array sends one
+                summary, not 30 messages.
+              </p>
+            </li>
+            <li>
+              <h3>Your phone gets a push</h3>
+              <p>
+                Through <a href="https://ntfy.sh">ntfy</a>, a free notification
+                service with iOS and Android apps. No account needed.
+              </p>
+            </li>
+          </ol>
+          <div class="callout">
+            <strong>This is optional.</strong>
+            <p>
+              You can always check jobs yourself, ideally by
+              <a href="mount.html">reading status files through a mount</a>.
+              Notifications suit long jobs and big arrays you don’t want to keep
+              checking.
+            </p>
+          </div>
+        </section>
+        <section id="setup">
+          <span class="section-kicker">Set up once</span>
+          <h2>Install hpc-watch.</h2>
+          <p class="lede">
+            <a href="https://github.com/margauxmedwards/hpc-watch-ntfy">hpc-watch-ntfy</a> is a small, dependency-free, open-source (MIT)
+            Python tool from the same community toolkit. Its setup script explains every step as it
+            goes.
+          </p>
+          <p>
+            You need key-based SSH to Aqua (no password prompt) and Python 3. The
+            installer sets up a Linux <code>systemd</code> timer; on other systems you
+            can run <code>./collector.py poll</code> on your own schedule.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Get it and run the setup</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · Linux<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="notify-install"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="notify-install">git clone https://github.com/margauxmedwards/hpc-watch-ntfy.git ~/hpc-watch
+cd ~/hpc-watch
+./setup.sh --explain   # read the walkthrough first (changes nothing)
+./setup.sh             # then set it up for real</code></pre>
+              </div>
+            </li>
+            <li>
+              <h3>Subscribe on your phone</h3>
+              <p>
+                Install the <b>ntfy</b> app (App Store, Google Play or F-Droid), tap
+                <b>Subscribe to topic</b>, and enter the topic name the setup script
+                generated for you.
+              </p>
+            </li>
+            <li>
+              <h3>Check it works</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · from ~/hpc-watch<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="notify-check"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="notify-check">./collector.py test-push   # one test notification to your phone
+./collector.py doctor      # checks SSH, qstat, ntfy and the timer
+./collector.py status      # what it currently sees</code></pre>
+              </div>
+            </li>
+          </ol>
+          <div class="callout warning">
+            <strong>Your topic name is a password.</strong>
+            <p>
+              On the public ntfy server, anyone who knows the topic can read your
+              notifications (job names, node names, exit codes). Keep the long random
+              name the setup script generates, and don’t share it.
+            </p>
+          </div>
+        </section>
+        <section id="what">
+          <span class="section-kicker">What you’ll hear about</span>
+          <h2>Only the changes that matter.</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>When a job…</th>
+                  <th>Notification</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>starts running</td>
+                  <td>Normal, with the node it landed on</td>
+                </tr>
+                <tr>
+                  <td>finishes with exit code 0</td>
+                  <td>Normal</td>
+                </tr>
+                <tr>
+                  <td>finishes with any other exit code</td>
+                  <td><b>High priority</b></td>
+                </tr>
+                <tr>
+                  <td>is held</td>
+                  <td><b>High priority</b></td>
+                </tr>
+                <tr>
+                  <td>prints an error in its log (optional)</td>
+                  <td><b>High priority</b>, even while still running</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Queued jobs are recorded but don’t notify. <code>./collector.py report</code>
+            also compares the time and memory you requested with what jobs actually
+            used, which helps you ask for less and start sooner.
+          </p>
+        </section>
+        <section id="logs">
+          <span class="section-kicker">Optional</span>
+          <h2>Say what the job is doing.</h2>
+          <p>
+            Point hpc-watch at your log folders (<code>HPC_WATCH_LOG_DIRS</code>) and
+            it can also report progress and catch errors that still exit 0. A few
+            lines in the job script make that clear:
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Inside job.pbs · after redirecting output<button
+                class="copy js-only"
+                type="button"
+                data-copy="notify-instrument"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="notify-instrument">source &quot;$HOME/hpc-watch/contrib/hpcwatch.sh&quot;
+hpcwatch_init &quot;resnet50_cifar10_seed0&quot;
+hpcwatch_stage &quot;training resnet50 on cifar10&quot;
+python train.py || hpcwatch_fail &quot;resnet50/cifar10&quot;</code></pre>
+          </div>
+          <p class="small">
+            These helpers only print lines to the job’s log. A job that uses them still
+            runs normally when hpc-watch isn’t installed.
+          </p>
+        </section>
+        <section id="good">
+          <span class="section-kicker">Good habits</span>
+          <h2>One watcher is enough.</h2>
+          <ul>
+            <li>
+              hpc-watch shares one SSH connection and checks every 3 minutes. Don’t
+              poll faster, and don’t run other SSH polling loops alongside it.
+            </li>
+            <li>
+              If you use an <a href="agents.html">AI agent</a>, tell it hpc-watch is
+              running so it doesn’t start its own watcher.
+            </li>
+            <li>
+              Your computer must be awake and able to reach Aqua (VPN if you need
+              it). If it sleeps, you get the missed changes when it wakes.
+            </li>
+          </ul>
+        </section>
+        <footer class="footer">
+          Notifications · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

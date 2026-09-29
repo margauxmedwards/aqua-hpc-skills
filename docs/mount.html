@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Mount your QUT Aqua home folder on Linux, macOS or Windows with SSHFS, reuse one SSH connection, and poll jobs through status files instead of repeated logins."
+    />
+    <title>Mount Aqua · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html" aria-current="page">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · Mount Aqua</div>
+      <h1>Mount Aqua.<br />Log in less.</h1>
+      <p>
+        Open Aqua’s files on your own computer through one connection, and check on jobs by reading status files instead of logging in over and over.
+      </p>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Page sections">
+          <a href="#why">Why mount?</a>
+          <a href="#setup">Set up once</a>
+          <a href="#ssh">Reuse one connection</a>
+          <a href="#polling">Poll files, not logins</a>
+          <a href="#agent">Using an AI agent</a>
+          <a href="#limits">Good habits</a>
+        </nav>
+      </aside>
+      <main id="main">
+        <section id="why">
+          <span class="section-kicker">Why mount?</span>
+          <h2>Fewer logins, same files.</h2>
+          <p class="lede">
+            Every SSH login opens a new connection to Aqua. Polling loops, per-job
+            checks and scripts that connect repeatedly can open hundreds. Mounting
+            Aqua keeps <b>one</b> connection open and lets you browse Aqua’s files
+            like a local folder, in your own editor.
+          </p>
+          <div class="callout warning">
+            <strong>Don’t log in over and over.</strong>
+            <p>
+              Many SSH connections in a short time can trip Aqua’s connection
+              limits. In our experience, SSH can then hang for about an hour—it looks
+              exactly like an outage. This is an observation, not a published QUT
+              limit.
+            </p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>To do this…</th>
+                  <th>Use</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Read logs, status files and small results</td>
+                  <td><b>The mount</b></td>
+                </tr>
+                <tr>
+                  <td>Edit job scripts and configs</td>
+                  <td><b>The mount</b></td>
+                </tr>
+                <tr>
+                  <td>Copy datasets or large results</td>
+                  <td>
+                    <code>rsync</code> or <code>scp</code>. The mount is much slower
+                    for bulk data (about 25× in our tests).
+                  </td>
+                </tr>
+                <tr>
+                  <td>Submit jobs or check the queue</td>
+                  <td>One batched <code>ssh</code> command (see below)</td>
+                </tr>
+                <tr>
+                  <td>Run programs</td>
+                  <td>A PBS job on a compute node, never through the mount</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section id="setup">
+          <span class="section-kicker">Set up once</span>
+          <h2>Mount Aqua on your computer.</h2>
+          <p class="lede">
+            You need working SSH access first, ideally with an SSH key so the mount
+            can reconnect without a password. Follow
+            <a href="https://docs.eres.qut.edu.au/about-aqua">QUT’s Aqua guidance</a> for keys and VPN.
+            Replace <code>YOUR_QUT_USERNAME</code> in each example.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Linux</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · Linux (Debian/Ubuntu shown)<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="mount-linux"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="mount-linux">sudo apt install sshfs
+mkdir -p ~/aqua
+sshfs YOUR_QUT_USERNAME@aqua.qut.edu.au: ~/aqua \
+  -o reconnect,idmap=user,ServerAliveInterval=30,ServerAliveCountMax=6
+ls ~/aqua</code></pre>
+              </div>
+              <p>
+                The trailing <code>:</code> mounts your Aqua home folder.
+                <code>reconnect</code> recovers after sleep or a network drop;
+                files open at that moment need reopening.
+              </p>
+            </li>
+            <li>
+              <h3>macOS</h3>
+              <p>
+                Install <b>macFUSE</b> and <b>SSHFS</b> from
+                <a href="https://macfuse.github.io/">macfuse.github.io</a>, and allow
+                the system extension if macOS asks. Then:
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · macOS, after installing macFUSE and SSHFS<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="mount-mac"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="mount-mac">mkdir -p ~/aqua
+sshfs YOUR_QUT_USERNAME@aqua.qut.edu.au: ~/aqua \
+  -o reconnect,ServerAliveInterval=30,ServerAliveCountMax=6
+ls ~/aqua</code></pre>
+              </div>
+            </li>
+            <li>
+              <h3>Windows</h3>
+              <p>
+                <a href="https://github.com/winfsp/sshfs-win">SSHFS-Win</a> needs
+                <a href="https://winfsp.dev/">WinFsp</a>; install WinFsp first if
+                winget doesn’t. <code>sshfs.k</code> uses the key in your
+                <code>.ssh</code> folder; use <code>\\sshfs\…</code> instead to be
+                asked for a password. You can also map the same path with
+                <b>File Explorer → Map network drive</b>.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · Windows, in PowerShell<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="mount-windows"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="mount-windows">winget install SSHFS-Win.SSHFS-Win
+net use A: \\sshfs.k\YOUR_QUT_USERNAME@aqua.qut.edu.au</code></pre>
+              </div>
+            </li>
+          </ol>
+          <p>Unmount when you are done:</p>
+          <div class="codebox">
+            <div class="codehead">
+              Your computer · when you are finished<button
+                class="copy js-only"
+                type="button"
+                data-copy="mount-unmount"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="mount-unmount"># Linux
+fusermount -u ~/aqua     # or fusermount3 -u on newer systems
+# macOS
+umount ~/aqua
+# Windows
+net use A: /delete</code></pre>
+          </div>
+          <p class="small">
+            Sources: <a href="https://github.com/libfuse/sshfs">SSHFS</a>,
+            <a href="https://macfuse.github.io/">macFUSE</a> and
+            <a href="https://github.com/winfsp/sshfs-win">SSHFS-Win</a>
+            documentation.
+          </p>
+        </section>
+        <section id="ssh">
+          <span class="section-kicker">The SSH you still need</span>
+          <h2>Reuse one connection.</h2>
+          <p>
+            Submitting and checking the queue still need SSH. With connection
+            sharing, every <code>ssh aqua</code> command for the next 10 minutes
+            reuses one connection instead of logging in again.
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Your computer · add to ~/.ssh/config (Linux, macOS, WSL)<button
+                class="copy js-only"
+                type="button"
+                data-copy="ssh-multiplex"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="ssh-multiplex">Host aqua
+    HostName aqua.qut.edu.au
+    User YOUR_QUT_USERNAME
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 10m
+    ServerAliveInterval 30</code></pre>
+          </div>
+          <p>Then batch what you need into a single command:</p>
+          <div class="codebox">
+            <div class="codehead">
+              Your computer · one connection, several checks<button
+                class="copy js-only"
+                type="button"
+                data-copy="ssh-batched"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="ssh-batched">ssh aqua 'qstat -u &quot;$USER&quot;; qstat -xf JOB_ID | grep -E &quot;job_state|Exit_status&quot;'</code></pre>
+          </div>
+          <ul>
+            <li>
+              Run SSH commands one after another, never many in parallel.
+            </li>
+            <li>
+              With this alias you can also mount with
+              <code>sshfs aqua: ~/aqua</code>.
+            </li>
+            <li>
+              Windows’ built-in OpenSSH doesn’t support connection sharing. Use
+              <a href="https://learn.microsoft.com/windows/wsl/">WSL</a>, or keep one
+              interactive session open instead of reconnecting.
+            </li>
+          </ul>
+        </section>
+        <section id="polling">
+          <span class="section-kicker">Watching jobs</span>
+          <h2>Poll files, not logins.</h2>
+          <p class="lede">
+            Have each job write a small status file, then check it through the mount.
+            Checking costs no new connections.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Write status from the job</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  Inside job.pbs · after set -euo pipefail and cd<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="status-job"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="status-job">status=&quot;$PBS_O_WORKDIR/status.txt&quot;
+echo &quot;running $PBS_JOBID $(date -Is)&quot; &gt; &quot;$status&quot;
+trap &#x27;echo &quot;finished exit=$? $(date -Is)&quot; &gt;&gt; &quot;$status&quot;&#x27; EXIT</code></pre>
+              </div>
+              <p>
+                <code>status.txt</code> says <code>running</code> when the job starts
+                and <code>finished exit=0</code> (or another code) when it ends, even
+                if it fails.
+              </p>
+            </li>
+            <li>
+              <h3>Read it from your computer</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · check every 5 minutes; Ctrl+C to stop<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="status-poll"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="status-poll">while sleep 300; do
+  date
+  cat ~/aqua/YOUR_RUN_FOLDER/status.txt
+done</code></pre>
+              </div>
+              <p>
+                Every few minutes is plenty. You can also just open the file in your
+                editor.
+              </p>
+            </li>
+            <li>
+              <h3>Confirm the end once with PBS</h3>
+              <p>
+                A job still waiting in the queue hasn’t written a status file yet,
+                and the mount can briefly show a cached copy. When the file says
+                finished, confirm once with <code>ssh aqua 'qstat -xf JOB_ID'</code>
+                and check the outputs.
+              </p>
+            </li>
+          </ol>
+        </section>
+        <section id="agent">
+          <span class="section-kicker">Using an AI agent?</span>
+          <h2>Point your agent at the mount.</h2>
+          <p>
+            Agents poll often and can open many SSH connections quickly. Tell yours
+            where the mount is and how to use SSH:
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Agent prompt · adjust the path and interval<button
+                class="copy js-only"
+                type="button"
+                data-copy="mount-prompt"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="mount-prompt">Aqua is mounted at ~/aqua. Read logs, status files and small outputs
+through the mount instead of over SSH. Use rsync for large transfers.
+When you need the scheduler, batch checks into one `ssh aqua` command,
+at most every 10 minutes, and never open SSH connections in parallel.</code></pre>
+          </div>
+          <p class="small">
+            The <a href="agents.html">aqua-hpc skill</a> already prefers an existing
+            mount for small progress files and batches its SSH queries.
+          </p>
+        </section>
+        <section id="limits">
+          <span class="section-kicker">Good habits</span>
+          <h2>Keep the mount light.</h2>
+          <ul>
+            <li>
+              Don’t run programs or builds against files through the mount; do the
+              work in a job on Aqua.
+            </li>
+            <li>
+              Avoid searching or indexing huge folders through it (for example, an
+              editor indexing a dataset folder). Open the run folder you need.
+            </li>
+            <li>
+              Use <code>rsync</code> for anything large, and never delete remote data
+              through the mount without checking what is there.
+            </li>
+            <li>
+              Unmount when you are finished for the day.
+            </li>
+          </ul>
+        </section>
+        <footer class="footer">
+          Mount Aqua · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

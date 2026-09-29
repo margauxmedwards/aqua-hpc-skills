@@ -1,0 +1,58 @@
+[
+  {
+    "id": "camera-baseline-0",
+    "sensor": "camera",
+    "model": "baseline",
+    "seed": 0,
+    "samples": 10
+  },
+  {
+    "id": "camera-baseline-1",
+    "sensor": "camera",
+    "model": "baseline",
+    "seed": 1,
+    "samples": 10
+  },
+  {
+    "id": "camera-alternate-0",
+    "sensor": "camera",
+    "model": "alternate",
+    "seed": 0,
+    "samples": 10
+  },
+  {
+    "id": "camera-alternate-1",
+    "sensor": "camera",
+    "model": "alternate",
+    "seed": 1,
+    "samples": 10
+  },
+  {
+    "id": "lidar-baseline-0",
+    "sensor": "lidar",
+    "model": "baseline",
+    "seed": 0,
+    "samples": 10
+  },
+  {
+    "id": "lidar-baseline-1",
+    "sensor": "lidar",
+    "model": "baseline",
+    "seed": 1,
+    "samples": 10
+  },
+  {
+    "id": "lidar-alternate-0",
+    "sensor": "lidar",
+    "model": "alternate",
+    "seed": 0,
+    "samples": 10
+  },
+  {
+    "id": "lidar-alternate-1",
+    "sensor": "lidar",
+    "model": "alternate",
+    "seed": 1,
+    "samples": 10
+  }
+]

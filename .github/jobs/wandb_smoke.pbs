@@ -1,0 +1,4 @@
+#!/bin/bash
+# Legacy helper retired: never install dependencies automatically on compute nodes.
+echo 'Prepare a pinned environment and adapt the current PBS example; see skills/aqua-hpc/references/operations.md.' >&2
+exit 2

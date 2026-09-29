@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="A beginner walkthrough for a first QUT Aqua PBS job: access, RPID, SSH, a tiny CPU job and checking results. Official QUT documentation takes precedence."
+    />
+    <title>Your first Aqua job · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html" aria-current="page">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · First job</div>
+      <h1>Your first job on Aqua.<br />One step at a time.</h1>
+      <p>
+        A hands-on walkthrough for connecting, submitting a small job and
+        checking the result yourself. QUT’s
+        <a href="https://docs.eres.qut.edu.au/about-aqua">official Aqua documentation</a> takes precedence.
+      </p>
+      <div class="badges">
+        <span class="badge">PBS · SSH · first job</span
+        ><span class="badge">Reviewed 28 September 2026</span>
+      </div>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Guide sections">
+          <a href="#start">How Aqua works</a
+          ><a href="#prepare">1. Before you start</a
+          ><a href="#rpid">2. Find your RPID</a
+          ><a href="#connect">3. Connect to Aqua</a
+          ><a href="#first-job">4. Submit a tiny job</a
+          ><a href="#results">5. Check &amp; collect results</a
+          ><a href="#run">6. Run your experiment</a
+          ><a href="#queues">Choose resources</a
+          ><a href="#official">Official QUT documentation</a>
+        </nav>
+        <p>
+          A community walkthrough, not official QUT policy.
+          <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a> is authoritative.
+        </p>
+      </aside>
+      <main id="main">
+        <section id="start">
+          <span class="section-kicker">Start here / No HPC experience needed</span>
+          <h2>What you will do.</h2>
+          <p class="lede">
+            Send a tiny calculation to an Aqua compute node, check that it worked,
+            and copy the result back. No GPU, dataset, Python environment or AI tool
+            is needed.
+          </p>
+          <div class="callout">
+            <strong>QUT’s documentation comes first.</strong>
+            <p>
+              QUT eResearch maintains the authoritative guides:
+              <a href="https://docs.eres.qut.edu.au/about-aqua">About Aqua</a> and
+              <a href="https://docs.eres.qut.edu.au/hpc-submitting-jobs-on-aqua">Submitting jobs on Aqua</a>. This page follows
+              the same path with one tiny example. Where they differ, follow QUT.
+            </p>
+          </div>
+          <p>
+            <b>HPC</b> (high-performance computing) is a shared group of powerful
+            computers, and Aqua is QUT’s. You don’t run an experiment straight after
+            logging in. You submit a <b>job</b>—a script plus a resource request—and
+            the scheduler starts it when resources are free.
+          </p>
+          <div class="grid" aria-label="The three places your work happens">
+            <article class="card">
+              <span class="number">01 / YOUR COMPUTER</span>
+              <h3>Prepare and connect</h3>
+              <p>
+                You open a terminal, edit code, and later inspect downloaded
+                results. A coding agent can also run here.
+              </p>
+            </article>
+            <article class="card">
+              <span class="number">02 / AQUA LOGIN NODE</span>
+              <h3>Organise and submit</h3>
+              <p>
+                SSH connects you to this shared front door. Use it to prepare
+                files, submit jobs and read status—not to run large experiments.
+              </p>
+            </article>
+            <article class="card">
+              <span class="number">03 / COMPUTE NODE</span>
+              <h3>Run the calculation</h3>
+              <p>
+                PBS, Aqua’s scheduler, assigns a computer to your job. Its CPUs
+                or GPUs do the work and write results to files.
+              </p>
+            </article>
+          </div>
+          <p>
+            Every command box is labelled <b>YOUR COMPUTER</b> or <b>ON AQUA</b>
+            (after you connect with SSH). Copy the command, not the example output.
+            This page never connects or submits anything itself.
+          </p>
+          <p><a class="action" href="#prepare">Start at step 1 →</a></p>
+          <p class="small">
+            About 15–30 minutes once you have access. Already running jobs? Jump to
+            <a href="#rpid">the RPID update</a>. Want an agent to run this for you?
+            See the <a href="agents.html">agent skills guide</a>.
+          </p>
+          <details>
+            <summary>A few terms you will see</summary>
+            <div class="detail">
+              <dl>
+                <dt><b>Terminal / shell</b></dt>
+                <dd>The window and program where you type commands.</dd>
+                <dt><b>SSH</b></dt>
+                <dd>A way to open a terminal session on another computer.</dd>
+                <dt><b>PBS / scheduler</b></dt>
+                <dd>The service that queues jobs and assigns resources.</dd>
+                <dt><b>Queue</b></dt>
+                <dd>
+                  A group of jobs with routing and resource rules. Joining a
+                  queue does not mean a job starts immediately.
+                </dd>
+                <dt><b>RPID</b></dt>
+                <dd>
+                  Your research project identifier, used for job accounting. It
+                  is not your password.
+                </dd>
+                <dt><b>CPU / GPU / RAM</b></dt>
+                <dd>
+                  A general-purpose processor, a specialised parallel processor,
+                  and working memory. GPU memory is separate from host RAM.
+                </dd>
+                <dt><b>Walltime</b></dt>
+                <dd>
+                  The maximum elapsed runtime requested for a job, not the time
+                  it waits in a queue.
+                </dd>
+                <dt><b>Log / checkpoint</b></dt>
+                <dd>
+                  A log records what happened. A checkpoint saves application
+                  state that may allow a supported program to resume.
+                </dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+        <section id="prepare">
+          <span class="section-kicker">Step 1 / Before you start</span>
+          <h2>Get access and open a terminal.</h2>
+          <ol class="steps">
+            <li>
+              <h3>Check your account can use Aqua</h3>
+              <p>
+                You need a QUT account authorised for HPC and access to the research
+                project you will charge jobs to. If you are new, ask your supervisor
+                or QUT eResearch, and start with
+                <a href="https://docs.eres.qut.edu.au/about-aqua">QUT’s Aqua guidance</a>. Follow QUT’s current
+                VPN and login instructions for your location.
+              </p>
+            </li>
+            <li>
+              <h3>Open a terminal</h3>
+              <ul>
+                <li><b>Windows:</b> Windows Terminal or PowerShell.</li>
+                <li><b>macOS:</b> Terminal.</li>
+                <li><b>Linux:</b> your usual terminal.</li>
+              </ul>
+            </li>
+            <li>
+              <h3>Have these ready</h3>
+              <ul>
+                <li>Your QUT username and login method.</li>
+                <li>Your project’s RPID (next step).</li>
+              </ul>
+              <p>
+                This tutorial asks for one CPU, 1 GB of memory and two minutes.
+              </p>
+            </li>
+          </ol>
+          <p><a href="#rpid">Next: find your project RPID →</a></p>
+        </section>
+        <section id="rpid">
+          <span class="section-kicker">Step 2 / Project accounting</span>
+          <h2>Find your project’s RPID.</h2>
+          <p class="lede">
+            An RPID (research project ID) tells QUT which project a job belongs to.
+            Every submission needs one from 2 November 2026.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Look it up</h3>
+              <p>
+                Sign in to the
+                <a href="https://data-mgmt-plan.qut.edu.au/">QUT Data Management Plan system</a> and open your
+                research project. An RPID is six uppercase letters followed by four
+                digits.
+              </p>
+            </li>
+            <li>
+              <h3>Can’t find it? Ask</h3>
+              <p>
+                Your project lead or eResearch can confirm the right ID and your
+                access. Never borrow another project’s ID or use an example ID.
+              </p>
+            </li>
+          </ol>
+          <p>You will type it in at step 4.</p>
+          <div class="callout">
+            <strong>Updating existing job scripts?</strong>
+            <p>
+              The <a href="rpid.html">RPID page</a> covers adding the ID to scripts,
+              arrays and retries, with a helper that builds the commands for you.
+            </p>
+          </div>
+          <p><a href="#connect">Next: connect to Aqua →</a></p>
+        </section>
+        <section id="connect">
+          <span class="section-kicker">Step 3 / Your computer → Aqua</span>
+          <h2>Connect, then check where you are.</h2>
+          <p class="lede">
+            SSH opens a terminal on Aqua. Once connected, commands act on Aqua’s
+            files, not your computer’s.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Connect from your own terminal</h3>
+              <p>
+                Replace <code>YOUR_QUT_USERNAME</code> with your username. If QUT gave
+                you a different host or SSH alias, use that.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · Windows, macOS or Linux<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="connect-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="connect-command">ssh YOUR_QUT_USERNAME@aqua.qut.edu.au</code></pre>
+              </div>
+              <p>
+                Password entry may show no characters; that is normal. On a first
+                connection, check the host-key fingerprint against QUT’s guidance
+                before accepting it.
+              </p>
+            </li>
+            <li>
+              <h3>Confirm you are on Aqua</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · read-only checks<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="location-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="location-command">hostname
+whoami
+pwd
+command -v qsub</code></pre>
+              </div>
+              <p>
+                <b>Expected:</b> an Aqua login-node name, your username, a remote
+                directory, and a path to <code>qsub</code> such as
+                <code>/opt/pbs/bin/qsub</code>. These commands change nothing.
+              </p>
+            </li>
+          </ol>
+          <details>
+            <summary>Can’t connect?</summary>
+            <div class="detail">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>If you see…</th>
+                      <th>What to do</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Could not resolve hostname / connection timeout</td>
+                      <td>
+                        Check the hostname, network and QUT’s current VPN/access
+                        requirements. This alone does not prove Aqua is down.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Permission denied / authentication failed</td>
+                      <td>
+                        Check the username, account authorisation and approved
+                        key/password method. Ask QUT support if needed.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>REMOTE HOST IDENTIFICATION HAS CHANGED</td>
+                      <td>
+                        Stop and verify the change with QUT; do not bypass the check
+                        or delete known-host entries blindly.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>Don’t keep retrying a failing login; fix the cause first.</p>
+            </div>
+          </details>
+          <div class="callout">
+            <strong>You are on a login node.</strong>
+            <p>
+              It is for preparing files and submitting jobs. Large calculations, GPU
+              tests and heavy builds belong on compute nodes. Keep this terminal open
+              for steps 4–5.
+            </p>
+          </div>
+          <p><a href="#first-job">Next: submit your first job →</a></p>
+        </section>
+        <section id="first-job">
+          <span class="section-kicker">Step 4 / Your first scheduled calculation</span>
+          <h2>Create a tiny job and submit it.</h2>
+          <p class="lede">
+            The job adds the numbers 1 to 100,000 and checks the answer, using only
+            tools already in the shell.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Make a fresh working folder</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · create a fresh tutorial folder<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-directory"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-directory">run_dir=$(mktemp -d &quot;$HOME/aqua-first-job.XXXXXX&quot;) &amp;&amp;
+  cd &quot;$run_dir&quot; &amp;&amp; pwd</code></pre>
+              </div>
+              <p>
+                <b>Expected:</b> a path ending in <code>aqua-first-job.</code> plus a
+                random suffix. Note it down; you need it in step 5.
+              </p>
+            </li>
+            <li>
+              <h3>Write the job file</h3>
+              <p>
+                Paste the whole block, including the final <code>PBS</code> line. It
+                writes <code>hello.pbs</code> but doesn’t run anything yet.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · write hello.pbs<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="hello-pbs-script"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="hello-pbs-script">cat &gt; hello.pbs &lt;&lt;&#x27;PBS&#x27;
+#!/bin/bash
+#PBS -N aqua_hello
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=1:mem=1gb
+#PBS -l walltime=00:02:00
+#PBS -j oe
+# Project accounting will be supplied with qsub -P.
+set -euo pipefail
+cd &quot;${PBS_O_WORKDIR:?}&quot;
+awk &#x27;BEGIN {for(i=1;i&lt;=100000;i++) s+=i; if(s!=5000050000) exit 1; print &quot;CPU arithmetic PASS: 5000050000&quot;}&#x27; &gt; result.txt
+printf &#x27;Job: %s\nHost: %s\n&#x27; &quot;${PBS_JOBID:?}&quot; &quot;$(hostname)&quot; &gt;&gt; result.txt
+cat result.txt
+PBS</code></pre>
+              </div>
+              <details>
+                <summary>What each line means</summary>
+                <div class="detail">
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Line in the script</th>
+                          <th>Meaning</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><code>#PBS -N aqua_hello</code></td>
+                          <td>A short name that helps you identify this job.</td>
+                        </tr>
+                        <tr>
+                          <td><code>#PBS -q cpu_batch</code></td>
+                          <td>
+                            Send this CPU-only workload through the CPU batch route.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>select=1:ncpus=1:mem=1gb</code></td>
+                          <td>
+                            Request one resource chunk with one CPU and 1 GB of host
+                            memory.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>walltime=00:02:00</code></td>
+                          <td>
+                            Allow up to two minutes after the job starts. Queue
+                            waiting is separate.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>#PBS -j oe</code></td>
+                          <td>
+                            Combine normal output and errors into one scheduler log.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>PBS_O_WORKDIR</code></td>
+                          <td>
+                            A variable PBS provides: the directory you submitted
+                            from.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            </li>
+            <li>
+              <h3>Enter your RPID and submit once</h3>
+              <p>
+                This asks for your RPID, checks its format, then submits the job.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · this submits one real job<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-submit"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-submit">read -r -p &quot;Your authorised project RPID: &quot; AQUA_RPID
+if [[ &quot;$AQUA_RPID&quot; =~ ^[A-Z]{6}[0-9]{4}$ &amp;&amp; &quot;$AQUA_RPID&quot; != ABCDEF1234 ]]; then
+  qsub -P &quot;$AQUA_RPID&quot; -o &quot;$PWD/job.log&quot; hello.pbs
+else
+  echo &quot;Enter your real RPID: six uppercase letters followed by four digits.&quot;
+fi</code></pre>
+              </div>
+              <p>
+                <b>Expected:</b> a job ID such as <code>12345678.aqua</code>. Save the
+                one you get. If the connection drops, check the queue before
+                resubmitting—the first attempt may have been accepted.
+              </p>
+            </li>
+          </ol>
+          <div class="callout">
+            <strong>Submitted is not finished.</strong>
+            <p>
+              The job may wait for a free CPU. Don’t run
+              <code>bash hello.pbs</code> on the login node to skip the queue.
+            </p>
+          </div>
+          <p><a href="#results">Next: check the result →</a></p>
+        </section>
+        <section id="results">
+          <span class="section-kicker">Step 5 / Prove that the job worked</span>
+          <h2>Check status, read the result, bring it back.</h2>
+          <ol class="steps">
+            <li>
+              <h3>Find your job</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · replace JOB_ID with your saved ID<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-status"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-status">qstat -u &quot;$USER&quot;
+qstat -f &#x27;JOB_ID&#x27;</code></pre>
+              </div>
+              <p>
+                Check <code>job_state</code>, <code>comment</code> and that the
+                recorded <code>project</code> is yours. Tiny jobs often finish before
+                you see them running.
+              </p>
+              <details>
+                <summary>What the job states mean</summary>
+                <div class="detail">
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>State</th>
+                          <th>Meaning</th>
+                          <th>Next step</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><code>Q</code></td>
+                          <td>Queued: waiting for resources.</td>
+                          <td>
+                            Wait and check occasionally. Do not submit a duplicate.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>R</code></td>
+                          <td>Running on a compute node.</td>
+                          <td>
+                            Let it finish; the tutorial calculation should be brief.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>H</code></td>
+                          <td>Held: prevented from running.</td>
+                          <td>
+                            Read the comment/hold type; some holds need an operator.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><code>E</code></td>
+                          <td>Exiting: still finalising.</td>
+                          <td>Wait for terminal state and output delivery.</td>
+                        </tr>
+                        <tr>
+                          <td><code>F</code></td>
+                          <td>Finished, visible in history if retained.</td>
+                          <td>
+                            Check exit status and output; “finished” does not mean
+                            “passed.”
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            </li>
+            <li>
+              <h3>Read the output</h3>
+              <p>From the step 4 folder, with your real job ID:</p>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · inspect the completed job<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-results"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-results">qstat -xf &#x27;JOB_ID&#x27;
+cat job.log
+cat result.txt</code></pre>
+              </div>
+              <p>
+                <b>It worked if both hold:</b> PBS reports
+                <code>Exit_status = 0</code>, and <code>result.txt</code> contains
+                <code>CPU arithmetic PASS: 5000050000</code> with the job ID and
+                compute hostname. <code>No such file or directory</code> usually means
+                the job hasn’t finished or you are in the wrong folder.
+              </p>
+            </li>
+            <li>
+              <h3>Copy the results to your computer</h3>
+              <p>
+                In a <b>second terminal on your computer</b>, replace the username and
+                the path with the folder you noted in step 4.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Your computer · replace username and remote directory<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-download"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-download">scp -r YOUR_QUT_USERNAME@aqua.qut.edu.au:/path/to/aqua-first-job.SUFFIX ./aqua-first-job-results</code></pre>
+              </div>
+              <p>
+                <b>Expected:</b> a local <code>aqua-first-job-results</code> folder
+                with <code>hello.pbs</code>, <code>job.log</code> and
+                <code>result.txt</code>. For regular use,
+                <a href="mount.html">mount Aqua</a> and open files directly.
+              </p>
+            </li>
+            <li>
+              <h3>Log out</h3>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · return this terminal to your computer<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="first-exit"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="first-exit">exit</code></pre>
+              </div>
+              <p>
+                Logging out doesn’t cancel batch jobs. To cancel one on purpose, use
+                <code>qdel 'JOB_ID'</code> with its exact ID.
+              </p>
+            </li>
+          </ol>
+          <div class="callout">
+            <strong>That is the whole HPC workflow.</strong>
+            <p>
+              Connect, submit, wait, verify, copy back. Bigger experiments change only
+              the workload, environment and resources. The
+              <a href="agents.html">agent skills guide</a> shows how Codex, Claude Code
+              or Copilot can take over the repeatable parts.
+            </p>
+          </div>
+          <p><a href="#run">Next: run your real experiment →</a></p>
+        </section>
+        <section id="run">
+          <span class="section-kicker">Step 6 / Your real experiment</span>
+          <h2>Swap in your own program.</h2>
+          <p class="lede">
+            Don’t start with every model, sensor or dataset. Get one representative
+            case working on a compute node first—a <b>smoke test</b>—then scale up.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>Start from a command that already works</h3>
+              <p>
+                Note the program, its input data and the output you expect. Use only
+                flags your program supports; check <code>--help</code>.
+              </p>
+            </li>
+            <li>
+              <h3>Put code and inputs on Aqua</h3>
+              <p>
+                Copy a fixed version of your code into a new run folder; files on
+                your laptop aren’t visible to Aqua. Ask QUT about project storage,
+                scratch space and quotas before moving a large dataset.
+              </p>
+            </li>
+            <li>
+              <h3>Prepare the software environment</h3>
+              <p>
+                Use your project’s Pixi, module or container setup. Build it once
+                (heavy builds don’t belong on the login node), then activate the same
+                environment inside the job script.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  Adapt to your project · example flags<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="pixi-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="pixi-command">pixi --version
+pixi install --locked
+pixi run --locked experiment --sensor camera --model baseline --seed 0</code></pre>
+              </div>
+              <p class="small">
+                The <code>experiment</code> task and its flags are examples; use your
+                project’s own. <code>--locked</code> keeps the environment matching
+                the committed lockfile.
+              </p>
+            </li>
+            <li>
+              <h3>Run one case as a job</h3>
+              <p>
+                Adapt <code>hello.pbs</code> to activate the environment and run your
+                command, keeping the RPID and a fresh output folder. Request a GPU
+                only if the program needs one. Check the output itself, not just the
+                exit code.
+              </p>
+            </li>
+            <li>
+              <h3>Scale up with a manifest</h3>
+              <p>
+                A <b>manifest</b> lists every case, such as each
+                dataset/model/seed combination. A <b>job array</b> runs one job per
+                row. Start with a low limit on how many run at once, and save every
+                job ID.
+              </p>
+            </li>
+          </ol>
+          <details>
+            <summary>Try the toolkit’s small CPU example</summary>
+            <div class="detail">
+              <p>
+                On Aqua, from the toolkit repository, set your real RPID and
+                choose a new directory. Preview first; it stages files but does
+                not submit.
+              </p>
+              <div class="codebox">
+                <div class="codehead">
+                  On Aqua · eight tiny CPU cells<button
+                    class="copy js-only"
+                    type="button"
+                    data-copy="demo-command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="demo-command">export AQUA_RPID=YOUR_REAL_RPID
+python3 scripts/submit_demo.py --run-dir "$HOME/aqua-demo-preview"
+
+# Explicit submission. Use a different, new run directory.
+python3 scripts/submit_demo.py --run-dir "$HOME/aqua-demo-run1" --submit
+
+# Run after completion to validate all eight cells.
+python3 "$HOME/aqua-demo-run1/check_results.py" \
+  --manifest "$HOME/aqua-demo-run1/matrix.json" \
+  --output "$HOME/aqua-demo-run1/results"</code></pre>
+              </div>
+              <p>
+                Each child requests one CPU, 1 GB and two minutes, with at most
+                two concurrent. Sensor/model labels are demonstration flags, not
+                real model inference. The example has no automatic retries or
+                checkpoint support.
+                <a href="../examples/matrix/README.md"
+                  >Full example instructions</a
+                >.
+              </p>
+            </div>
+          </details>
+          <div class="callout">
+            <strong>Running ROS or robotics pipelines?</strong>
+            <p>
+              See <a href="ros.html">ROS on Aqua</a> for environment, isolation and
+              playback checks.
+            </p>
+          </div>
+          <div class="callout">
+            <strong>Prefer to hand this to an agent?</strong>
+            <p>
+              The <a href="agents.html">agent skills guide</a> shows how Codex, Claude
+              Code or Copilot can stage, smoke-test, submit and validate these runs
+              within limits you set.
+            </p>
+          </div>
+        </section>
+        <section id="queues">
+          <span class="section-kicker">Reference / Choose resources</span>
+          <h2>QCR or general? Check eligibility first.</h2>
+          <p class="lede">
+            A lab allocation is not automatically faster. Choose from the
+            hardware, access, limits and placement your job can actually use.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">
+                How to choose an Aqua queue
+              </caption>
+              <thead>
+                <tr>
+                  <th>Workload</th>
+                  <th>Starting point</th>
+                  <th>Check before submitting</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CPU-only analysis or preprocessing</td>
+                  <td><code>cpu_batch</code></td>
+                  <td>
+                    Measured RAM, CPU count, walltime and any native-library
+                    requirements.
+                  </td>
+                </tr>
+                <tr>
+                  <td>GPU training or inference</td>
+                  <td><code>gpu_batch</code></td>
+                  <td>
+                    GPU model and memory your code needs (see below); current
+                    routing and resource limits.
+                  </td>
+                </tr>
+                <tr>
+                  <td>QCR GPU placement</td>
+                  <td>
+                    Verified public route with the site’s supported QCR selector
+                  </td>
+                  <td>
+                    Membership, current hardware and limits. Do not submit
+                    directly to a route-only execution queue.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">
+            <strong>Observed on 28 September 2026</strong>
+            <p>
+              <code>qcr-users</code> was a route-only execution queue reached
+              through <code>gpu_batch</code>, with a 48-hour walltime maximum
+              and a four-GPU running limit per user. Recheck these settings: they are observations, not
+              permanent policy or proof of access.
+            </p>
+          </div>
+          <p>
+            <code>qstat -Qf qcr-users cpu_batch gpu_batch</code> helps inspect
+            current definitions. Placement can require
+            <code>qlist=qcr-users</code> inside a select chunk. Removing that
+            constraint does not necessarily exclude QCR resources.
+            <a href="../skills/aqua-hpc/references/queue-and-time.md"
+              >Queue selection details</a
+            >.
+          </p>
+          <h3 id="gpu-model">Choosing a GPU model</h3>
+          <p>
+            Aqua’s GPU nodes have different models. The <code>gpu_id</code> resource
+            lets you choose one, or leave it out to accept any. On 28 September 2026
+            most GPU nodes were A100 or H100; a few had other models.
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Inside job.pbs · keep one select line<button
+                class="copy js-only"
+                type="button"
+                data-copy="gpu-select"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="gpu-select"># Any GPU model: widest choice of nodes
+#PBS -l select=1:ncpus=8:mem=32gb:ngpus=1
+
+# Only A100 nodes
+#PBS -l select=1:ncpus=8:mem=32gb:ngpus=1:gpu_id=A100
+
+# Only H100 nodes
+#PBS -l select=1:ncpus=8:mem=32gb:ngpus=1:gpu_id=H100</code></pre>
+          </div>
+          <p>
+            Pin a model only when you need to: for example, your code or its compiled
+            libraries only work on one architecture, or you are comparing timings.
+            Pinning narrows the nodes your job can use. See which models exist today
+            with <code>pbsnodes -av | grep gpu_id | sort | uniq -c</code>.
+          </p>
+          <h3>How much walltime should I ask for?</h3>
+          <p>
+            Walltime is the longest your job may run once it starts, not how long it
+            waits in the queue. The <a href="walltime.html">walltime calculator</a>
+            turns a quick measurement into a request with headroom.
+          </p>
+        </section>
+        <section id="official">
+          <span class="section-kicker">Reference / Official documentation</span>
+          <h2>Where the rules actually live.</h2>
+          <p>
+            QUT’s guidance takes precedence over this community walkthrough.
+            Check it for accounts, access, storage, queues and current
+            requirements:
+          </p>
+          <ul>
+            <li><a href="https://docs.eres.qut.edu.au/about-aqua">About Aqua</a></li>
+            <li>
+              <a href="https://docs.eres.qut.edu.au/hpc-submitting-jobs-on-aqua">Submitting jobs on Aqua</a>
+            </li>
+            <li>
+              <a href="https://docs.eres.qut.edu.au/about-rdss">About RDSS</a>
+              and <a href="https://docs.eres.qut.edu.au/rdss-faqs">RDSS FAQs</a>
+            </li>
+            <li>
+              <a href="https://data-mgmt-plan.qut.edu.au/"
+                >QUT Data Management Plan system</a
+              >
+              (RPIDs)
+            </li>
+          </ul>
+          <p>
+            Dates, observations and verification limits for this page are
+            recorded in the
+            <a href="agents.html#sources">agent guide’s sources section</a>.
+          </p>
+        </section>
+        <footer class="footer">
+          Your first job · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>

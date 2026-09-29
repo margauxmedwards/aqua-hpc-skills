@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Checks for running ROS and robotics pipelines headless on QUT Aqua: environment, code that actually runs, DDS isolation, readiness and output coverage."
+    />
+    <title>ROS on Aqua · Aqua field guide</title>
+    <link rel="stylesheet" href="guide.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="index.html">AQUA FIELD GUIDE</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="index.html">Home</a>
+        <a href="first-job.html">First job</a>
+        <a href="agents.html">AI agent guide</a>
+        <a href="rpid.html">RPID</a>
+        <a href="walltime.html">Walltime</a>
+        <a href="mount.html">Mount Aqua</a>
+        <a href="ros.html" aria-current="page">ROS</a>
+        <a href="notify.html">Notifications</a>
+      </nav>
+    </header>
+    <div class="hero">
+      <div class="eyebrow">Aqua field guide · ROS</div>
+      <h1>ROS on Aqua,<br />without surprises.</h1>
+      <p>
+        Four checks for headless ROS jobs on shared compute nodes: the code that runs, network isolation, reliable startup and complete output.
+      </p>
+    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <small>On this page</small>
+        <nav aria-label="Page sections">
+          <a href="#environment">Before you start</a>
+          <a href="#code">1. Code that runs</a>
+          <a href="#isolation">2. Job isolation</a>
+          <a href="#startup">3. Startup &amp; shutdown</a>
+          <a href="#data">4. Output coverage</a>
+          <a href="#agent">Using an AI agent</a>
+        </nav>
+      </aside>
+      <main id="main">
+        <section id="environment">
+          <span class="section-kicker">Before you start</span>
+          <h2>Keep the project’s ROS setup.</h2>
+          <p class="lede">
+            ROS jobs on Aqua run headless on shared compute nodes. Most problems come
+            from running different code, or sharing a network, without realising it.
+          </p>
+          <ul>
+            <li>
+              Keep your project’s ROS distribution, middleware and environment. Read
+              <code>package.xml</code>, launch files, Pixi tasks and setup scripts
+              before changing anything.
+            </li>
+            <li>
+              Don’t assume <code>/opt/ros/humble</code> exists on Aqua. Source the
+              intended underlay and overlay inside the job.
+            </li>
+            <li>
+              Keep heavy builds off the login node.
+            </li>
+          </ul>
+        </section>
+        <section id="code">
+          <span class="section-kicker">Check 1</span>
+          <h2>Confirm the code that actually runs.</h2>
+          <p>
+            Editing <code>src/</code> does not always update an installed copy. New
+            entry points, packaging changes and compiled code need a rebuild. Record
+            what the job resolves in its log:
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Inside the job, after activating the environment · replace the names<button
+                class="copy js-only"
+                type="button"
+                data-copy="ros-check"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="ros-check">ros2 pkg prefix YOUR_PACKAGE
+python3 -c &quot;import YOUR_MODULE; print(YOUR_MODULE.__file__)&quot;
+printenv | grep -E &#x27;^(ROS_|RMW_)&#x27; | sort</code></pre>
+          </div>
+          <p class="small">
+            These commands only read. The last line shows ROS and middleware
+            settings after activation, which is what the nodes really use.
+          </p>
+        </section>
+        <section id="isolation">
+          <span class="section-kicker">Check 2</span>
+          <h2>Keep jobs from hearing each other.</h2>
+          <p>
+            Jobs sharing a node can discover each other’s ROS participants. Give each
+            job its own discovery setup:
+          </p>
+          <ul>
+            <li>
+              Allocate ROS domain IDs deliberately. A hash of the job ID can collide,
+              and very many processes in one domain can still run out of ports.
+            </li>
+            <li>
+              For single-node jobs, localhost-only discovery can help, but other jobs
+              on the same host still share localhost. Verify the isolation you get.
+            </li>
+            <li>
+              Check the settings <b>after</b> Pixi or container activation. Activation
+              can override variables passed by PBS, so the scheduler record shows
+              what you asked for, not what the nodes used.
+            </li>
+          </ul>
+        </section>
+        <section id="startup">
+          <span class="section-kicker">Check 3</span>
+          <h2>Start reliably, stop cleanly.</h2>
+          <ul>
+            <li>
+              Wait for subscribers to confirm they are ready before playing bags. A
+              short-lived ready signal can vanish before a slow model finishes
+              loading.
+            </li>
+            <li>
+              Use startup and inactivity timeouts so a stuck pipeline ends instead of
+              burning walltime.
+            </li>
+            <li>
+              Pass child-process errors up, track the processes the run starts, and
+              clean up only those.
+            </li>
+          </ul>
+        </section>
+        <section id="data">
+          <span class="section-kicker">Check 4</span>
+          <h2>Prove every sensor produced output.</h2>
+          <ul>
+            <li>
+              Save bag timestamps, clock source, playback rate, QoS and topic
+              remappings with the run configuration.
+            </li>
+            <li>
+              Count expected messages or results per sensor. A run that exits
+              cleanly can still have skipped data.
+            </li>
+            <li>
+              If transport seems broken, test a minimal publisher/subscriber pair
+              inside the same allocation before blaming the middleware.
+            </li>
+          </ul>
+        </section>
+        <section id="agent">
+          <span class="section-kicker">Using an AI agent?</span>
+          <h2>Ask for these checks up front.</h2>
+          <p>
+            With the <a href="agents.html">aqua-hpc skill</a> installed, the agent
+            already knows these checks. Ask for a smoke case first:
+          </p>
+          <div class="codebox">
+            <div class="codehead">
+              Agent prompt · fill in your own launch file and bags<button
+                class="copy js-only"
+                type="button"
+                data-copy="ros-prompt"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="ros-prompt">Run these bags headlessly on Aqua with the existing launch file [launch],
+varying [sensor configuration] and [model]. Before scaling, verify the overlay
+paths that actually run, the effective ROS domain and discovery settings,
+readiness before playback, and message coverage per sensor.
+Prepare one smoke case first; do not submit the full set yet.</code></pre>
+          </div>
+          <p class="small">
+            Full detail:
+            <a href="../skills/aqua-hpc/references/ros.md">ROS reference</a>.
+          </p>
+        </section>
+        <footer class="footer">
+          ROS on Aqua · QCR community toolkit · MIT licensed ·
+          <a href="https://github.com/margauxmedwards/aqua-hpc-skills">Toolkit on GitHub</a>.<br />A community guide, not
+          official QUT policy. <a href="https://docs.eres.qut.edu.au/about-aqua">QUT eResearch documentation</a>
+          takes precedence.
+        </footer>
+      </main>
+    </div>
+    <div
+      id="copy-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="guide.js"></script>
+  </body>
+</html>
